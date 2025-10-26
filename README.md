@@ -84,9 +84,11 @@ module.exports = {
   },
   namedAccounts: {
     deployer: 0,
-    user1: 1
+    seller: 0,
+    buyer: 0
   }
 };
+
 
 
 ```

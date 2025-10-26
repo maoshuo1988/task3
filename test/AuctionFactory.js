@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 describe("AuctionFactory with UUPS Upgrade", function () {
-  let factory, aution, factoryProxy, auctionProxy;
+  let factory, auction, factoryProxy, auctionProxy;
   let auctionImplementation;
   let owner, seller, buyer;
 
@@ -32,7 +32,7 @@ describe("AuctionFactory with UUPS Upgrade", function () {
       .setAuctionImplementation(auctionImplementation);
   });
 
-  it("should factory setAuctionImplementation", async function () {
+  it("测试工厂加载拍卖合约", async function () {
     const storePath = path.resolve(
       __dirname,
       "../cache/store/proxyAuction.json"
@@ -41,17 +41,15 @@ describe("AuctionFactory with UUPS Upgrade", function () {
     expect(txt.implAddress).to.equal(auctionImplementation);
   });
 
-  it("Should create new auction", async function () {
+  it("测试创建拍卖", async function () {
     const { deploy, save } = deployments;
-    const { deployer, seller } = await getNamedAccounts();
-
-    console.log("test factory with seller:", seller);
+    console.log("test factory with seller:", seller.address);
     //为部署拍卖合约铸币
     const MockERC721 = await ethers.getContractFactory("MockERC721");
     const mockERC721 = await MockERC721.deploy();
     await mockERC721.waitForDeployment();
     const mockERC721Contract = await mockERC721.getAddress();
-    await mockERC721.mint(seller, 2);
+    await mockERC721.mint(seller.address, 2);
     console.log("seller 铸币完成");
 
     const duration = 86400;
@@ -60,17 +58,26 @@ describe("AuctionFactory with UUPS Upgrade", function () {
     const nftToken = 2;
     const tokenAddress = ethers.ZeroAddress;
 
-    console.log(11111111111);
-    const tx = await factory
+    // 授权
+    await mockERC721
       .connect(seller)
-      .createAuction(duration, startPrice, nftContract, nftToken, tokenAddress);
-    console.log(22222222222);
+      .setApprovalForAll(factoryProxy.address, true);
+    const tx = await factory.createAuction(
+      duration,
+      startPrice,
+      nftContract,
+      nftToken,
+      tokenAddress
+    );
     const d = await tx.wait();
-    console.log("a:", d, ethers.isAddress(d));
-
     const allAuctions = await factory.getAuctions();
-    expect(allAuctions).to.have.lengthOf(2);
+    expect(allAuctions).to.have.lengthOf(1);
   });
 
-  describe("Auction Functionality", function () {});
+
+  it("测试购买者出价", async function () {
+    // 购买者参与拍卖
+    await expect(auction.connect(buyer).bid(0, ethers.ZeroAddress, { value: ethers.parseEther("0.01") })).to.be.revertedWith();
+  });
+
 });

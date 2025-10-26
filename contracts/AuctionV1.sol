@@ -45,10 +45,7 @@ contract AuctionV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     ) public initializer {
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
-        console.log("_nftContract:", _nftContract);
-
-        // IERC721(_nftContract).approve(address(this), _nftToken);
-        
+        console.log("initialize _nftContract:", _nftContract);
         duration = _duration;
         startPrice = _startPrice;
         nftContract = _nftContract;
@@ -60,6 +57,8 @@ contract AuctionV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function bid(uint256 _amount, address _tokenAddress) public payable {
+        console.log("_amount:",_amount);
+        console.log("_tokenAddress:", _tokenAddress);
         //结束前校验
         require(block.timestamp <= auctionEndTime, "Auction already ended");
         uint payVal;
@@ -67,6 +66,7 @@ contract AuctionV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         payVal = _tokenAddress == address(0)
             ? msg.value * uint(getChainlinkDataFeedLatestAnswer(address(0)))
             : uint(getChainlinkDataFeedLatestAnswer(_tokenAddress));
+
         //切换coin或者token
         _amount = _tokenAddress == address(0) ? _amount : msg.value;
         //换算起拍与最高出价

@@ -46,46 +46,35 @@ contract AuctionFactoryV1 is
     }
 
     function createAuction(
-        uint256 duration,
-        uint256 startPrice,
-        address nftContract,
-        uint256 nftToken,
-        address tokenAddress
+        uint256 _duration,
+        uint256 _startPrice,
+        address _nftContract,
+        uint256 _nftToken,
+        address _tokenAddress
     ) public returns (address) {
         require(auctionImplementation != address(0), "Implementation not set");
-
-        // 检查NFT是否存在且属于调用者
-        IERC721 nft = IERC721(nftContract);
-        require(
-            nft.ownerOf(nftToken) == msg.sender,
-            "Not the owner of this NFT"
-        );
-        // 先转移NFT到工厂合约（临时持有）
-        nft.safeTransferFrom(msg.sender, address(this), nftToken);
         bytes memory data = abi.encodeWithSignature(
-            "initialize(uint256,uint256,address,uint256)",
-            duration,
-            startPrice,
-            nftContract,
-            nftToken,
-            tokenAddress
+            "initialize(uint256,uint256,address,uint256,address)",
+            _duration,
+            _startPrice,
+            _nftContract,
+            _nftToken,
+            _tokenAddress
         );
 
         ERC1967Proxy proxy = new ERC1967Proxy(auctionImplementation, data);
         address auctionAddress = address(proxy);
-        nft.safeTransferFrom(msg.sender, auctionAddress, nftToken);
-        // nft.approve(auctionAddress, nftToken);
-
+        IERC721(_nftContract).approve(auctionAddress, _nftToken);
         auctions.push(auctionAddress);
         isAuction[auctionAddress] = true;
 
         emit AuctionCreated(
             auctionAddress,
-            duration,
-            startPrice,
-            nftContract,
-            nftToken,
-            tokenAddress
+            _duration,
+            _startPrice,
+            _nftContract,
+            _nftToken,
+            _tokenAddress
         );
         return auctionAddress;
     }
