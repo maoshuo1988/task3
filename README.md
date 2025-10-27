@@ -62,8 +62,8 @@ npm i
 ### 配置 dotenv hardhat.config
 添加 .env文件
 ```
-INFURA_API_KEY=33045a1d50ff4aa2ba2321a76281a2ed
-PK=92a23b579cfc51fb9579dfb9aadd9ceb03832216f2e96ede1cbf623ab20e3778
+INFURA_API_KEY=--------------
+PK=----------
 ```
 
 配置hardhat config
@@ -103,3 +103,13 @@ npx hardhat deploy --network sepolia
 ```shell
 npx hardhat test
 ```
+
+# 拍卖流程
+
+##部署 
+
+部署拍卖合约=>工厂升级拍卖合约
+
+##拍卖
+
+铸币721=>授权给工厂=>
